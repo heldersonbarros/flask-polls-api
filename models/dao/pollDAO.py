@@ -10,12 +10,12 @@ class PollDAO:
         cursor = conn.cursor()
         poll_sql = """
             INSERT INTO Poll (question, isclosed, ispublicstatistics, timeLimit, 
-                            numchosenoptions, account_id, limit_vote_per_user) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id
+                            account_id, limit_vote_per_user) 
+            VALUES (%s, %s, %s, %s, %s, %s) RETURNING id
             """
 
         cursor.execute(poll_sql, (poll.question, poll.isClosed, poll.isPublicStatistics, 
-            poll.timeLimit, poll.numChosenOptions, poll.account_id, poll.limit_vote_per_user))
+            poll.timeLimit, poll.account_id, poll.limit_vote_per_user))
 
         poll_id = cursor.fetchone()[0]
 

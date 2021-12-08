@@ -4,7 +4,7 @@ def getConnection():
     try:
         conn = psycopg2.connect(
             host='localhost',
-            database='poll',
+            database='fbd',
             user='postgres',
             password='1234'
         )

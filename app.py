@@ -85,7 +85,6 @@ def edit_account(current_user):
 
     try:
         account = Account(name=data["name"], email=data["email"], username=data["username"], id=current_user)
-        print("aqiii")
         AccountDAO.update_account(account)
     except KeyError:
         return make_response(jsonify({'message' : 'Os dados passados estão invalidos'}), 400)
@@ -113,7 +112,7 @@ def create_poll(current_user):
 
     try:
         poll = Poll(question=data["question"], isClosed=data["isClosed"], isPublicStatistics=data["isPublicStatistics"],
-                    numChosenOptions=data["numChosenOptions"], timeLimit=data["timeLimit"], account_id=current_user,
+                    timeLimit=data["timeLimit"], account_id=current_user,
                     limit_vote_per_user=data["limit_vote_per_user"], created_at=datetime.datetime.now()
                 )
 
