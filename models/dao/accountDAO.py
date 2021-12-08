@@ -22,7 +22,7 @@ class AccountDAO:
         return current_user[0]
 
     def create_account(account):
-        conn= getConnection()
+        conn = getConnection()
         cursor = conn.cursor()
         account_sql = """
             INSERT INTO Account (name, email, username, password) VALUES (%s, %s, %s, %s)
@@ -56,13 +56,26 @@ class AccountDAO:
         conn= getConnection()
         cursor = conn.cursor()
         
-        print("chegou")
         account_sql = """
             UPDATE Account set name = %s, username = %s, email = %s
             WHERE id = %s;
             """
 
         cursor.execute(account_sql, (account.name, account.username, account.email, account.id))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    def delete_account(id):
+        conn = getConnection()
+        cursor = conn.cursor()
+
+        account_sql = """
+            DELETE FROM Account WHERE id=%s
+        """
+
+        cursor.execute(account_sql, (id,))
         
         conn.commit()
         cursor.close()

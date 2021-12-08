@@ -47,8 +47,6 @@ def token_required(f):
     return decorator
 
 
-
-
 @app.route("/accounts/signup", methods=["POST"])
 def create_account():
     data = request.get_json()
@@ -85,10 +83,6 @@ def login():
 def edit_account(current_user):
     data = request.get_json()
 
-
-    data["name"]
-    data["username"]
-    data["email"]
     try:
         account = Account(name=data["name"], email=data["email"], username=data["username"], id=current_user)
         print("aqiii")
@@ -106,6 +100,8 @@ def edit_account(current_user):
 def account_polls(username):
     try:
         polls_array = PollDAO.account_polls(username)
+        for poll in polls_array:
+            poll["options"] = OptionsDAO.getOptionsByPollId(poll["id"])
         return jsonify({"polls": polls_array})
     except NoObjectFound:
         return make_response(jsonify({'message' : 'Usuário não encontrado'}), 404)
@@ -150,9 +146,37 @@ def update_poll(current_user):
 
     return jsonify({"message": 'updated successfully'})
 
+@app.route('/polls/<id>/delete', methods=["POST"])
+@token_required
+def delete_poll(current_user, id):
+    
+    try:
+        PollDAO.delete_poll(id,current_user)
+    except KeyError:
+        return make_response(jsonify({'message' : 'Os dados passados estão invalidos'}), 400)
+    except UnauthorizedAccess:
+        return make_response(jsonify({'message' : 'Você não possui autorização para alterar o recurso requisitado'}), 403)
+
+    return jsonify({"message": 'deleted successfully'})
+
+@app.route('/account/<id>/delete', methods=["POST"])
+@token_required
+def delete_account(current_user, id):
+    
+    try:
+        AccountDAO.delete_poll(id,current_user)
+    except KeyError:
+        return make_response(jsonify({'message' : 'Os dados passados estão invalidos'}), 400)
+    except UnauthorizedAccess:
+        return make_response(jsonify({'message' : 'Você não possui autorização para alterar o recurso requisitado'}), 403)
+
+    return jsonify({"message": 'deleted successfully'})
+
 @app.route("/polls/latest")
 def latest():
     polls_array = PollDAO.latest()
+    for poll in polls_array:
+        poll["options"] = OptionsDAO.getOptionsByPollId(poll["id"])
 
     return jsonify({"polls": polls_array})
 
@@ -173,7 +197,9 @@ def polls_result(id):
         user_id = 0
 
     try:
-        result = PollDAO.polls_result(id,user_id)
+        check_poll = PollDAO.checkResultAuthorization(id, user_id)
+        if check_poll:
+            result = OptionsDAO.getOptionsVotesResult(id)
     except KeyError:
         return make_response(jsonify({'message' : 'Os dados passados estão invalidos'}), 400)
     except NoObjectFound:
@@ -209,7 +235,9 @@ def vote():
     except ExceededVotes:
         return make_response(jsonify({'message' : 'Você excedeu o limite de votos nessa enquete'}), 409)
     except NoObjectFound:
-        return make_response(jsonify({'message' : 'Enquete não encontrada'}), 404)
+        return make_response(jsonify({'message' : 'Enquete não encontrada ou votação indisponível'}), 404)
+    except UnauthorizedAccess:
+        return make_response(jsonify({'message' : 'Você não possui autorização para alterar o recurso requisitado'}), 403)
 
     return make_response(jsonify({'message' : 'voted successfully'}), 201)
 
