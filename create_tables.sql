@@ -1,0 +1,48 @@
+CREATE DATABASE polls_db;
+
+\c polls_db;
+
+CREATE TABLE Account(
+	id BIGSERIAL PRIMARY KEY,
+	name VARCHAR(50) NOT NULL,
+	email VARCHAR(50) NOT NULL,
+	username VARCHAR(50) NOT NULL,
+	password VARCHAR(128)  NOT NULL,
+	UNIQUE(username),
+	UNIQUE(email)
+);
+
+CREATE TABLE poll(
+	id BIGSERIAL PRIMARY KEY,
+	question VARCHAR(255) NOT NULL,
+	isClosed BOOLEAN NOT NULL,
+	isPublicStatistics BOOLEAN NOT NULL,
+	time_limit TIMESTAMP,
+	limit_vote_per_user INT,
+	account_id BIGINT NOT NULL REFERENCES account (id) ON DELETE CASCADE,
+	create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
+);
+
+CREATE TABLE options(
+	id BIGSERIAL PRIMARY KEY,
+	OptionText VARCHAR(255) NOT NULL,
+	poll_id BIGINT NOT NULL REFERENCES poll(id) ON DELETE CASCADE
+);
+
+CREATE TABLE vote(
+	id BIGSERIAL PRIMARY KEY,
+	poll_id BIGINT NOT NULL REFERENCES poll(id) ON DELETE CASCADE,
+	option_id BIGINT NOT NULL REFERENCES options(id) ON DELETE CASCADE,
+	account_id BIGINT REFERENCES account(id)
+);
+
+CREATE TABLE category(
+	id BIGSERIAL PRIMARY KEY,
+	CategoryName VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE CategoryPoll(
+	poll_id BIGINT NOT NULL REFERENCES poll(id) ON DELETE CASCADE,
+	category_id BIGINT NOT NULL REFERENCES category(id) ON DELETE CASCADE,
+	CONSTRAINT id PRIMARY KEY (poll_id, category_id)
+);

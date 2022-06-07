@@ -1,6 +1,6 @@
 class Poll:
-    def __init__(self, isClosed, isPublicStatistics, timeLimit, account_id, limit_vote_per_user,
-                question=None, numChosenOptions=None, created_at=None, id=None):
+    def __init__(self, isClosed, isPublicStatistics, account_id, timeLimit=None, limit_vote_per_user=None,
+                question=None, created_at=None, id=None):
         self.id = id
         self.question = question
         self.isClosed = isClosed

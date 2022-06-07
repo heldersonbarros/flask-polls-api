@@ -1,7 +1,7 @@
-from .connect_database import getConnection
-from models.vo.poll import Poll
-from models.dao.optionsDAO import OptionsDAO
-from models.vo.exceptions import NoObjectFound
+from utils.connect_database import getConnection
+from modules.poll.model import Poll
+from modules.option.dao import OptionsDAO
+from modules.exceptions import NoObjectFound
 
 class CategoryDAO:
 
@@ -33,12 +33,9 @@ class CategoryDAO:
             polls_array = []
             while current_poll is not None:
                 poll_object = poll_object = Poll(id= current_poll[0], question= current_poll[1], isClosed= current_poll[2],
-                            isPublicStatistics= current_poll[3], numChosenOptions= current_poll[4], 
-                            timeLimit= current_poll[5], account_id= current_poll[6], created_at= current_poll[7], limit_vote_per_user= current_poll[0])
-
-                options = current_poll[9].split(",")
+                            isPublicStatistics= current_poll[3], limit_vote_per_user= current_poll[4],
+                            timeLimit= current_poll[5], account_id= current_poll[6], created_at= current_poll[7])
                 
-
                 poll_dic = poll_object.get_json()
                 poll_dic["options"]= OptionsDAO.getOptionsByPollId(current_poll[0])
                 polls_array.append(poll_dic)
@@ -54,7 +51,7 @@ class CategoryDAO:
         return polls_array
 
 
-    def listAll():
+    def list_all():
         conn = getConnection()
         cursor = conn.cursor()
         account_sql = """

@@ -1,6 +1,6 @@
-from .connect_database import getConnection
-from models.vo.poll import Poll
-from models.vo.exceptions import NoObjectFound, UnauthorizedAccess, ExceededVotes
+from utils.connect_database import getConnection
+from modules.poll.model import Poll
+from modules.exceptions import NoObjectFound, UnauthorizedAccess
 
 
 class PollDAO:
@@ -9,13 +9,11 @@ class PollDAO:
         conn = getConnection()
         cursor = conn.cursor()
         poll_sql = """
-            INSERT INTO Poll (question, isclosed, ispublicstatistics, timeLimit, 
-                            account_id, limit_vote_per_user) 
-            VALUES (%s, %s, %s, %s, %s, %s) RETURNING id
+            INSERT INTO Poll (question, isclosed, ispublicstatistics, account_id) 
+            VALUES (%s, %s, %s, %s) RETURNING id
             """
 
-        cursor.execute(poll_sql, (poll.question, poll.isClosed, poll.isPublicStatistics, 
-            poll.timeLimit, poll.account_id, poll.limit_vote_per_user))
+        cursor.execute(poll_sql, (poll.question, poll.isClosed, poll.isPublicStatistics, poll.account_id))
 
         poll_id = cursor.fetchone()[0]
 
@@ -37,7 +35,7 @@ class PollDAO:
         if (cursor.fetchone()):
             
             poll_sql = """
-            UPDATE Poll set isClosed = %s, isPublicStatistics = %s, timeLimit = %s, limit_vote_per_user = %s
+            UPDATE Poll set isClosed = %s, isPublicStatistics = %s, time_limit = %s, limit_vote_per_user = %s
             WHERE id = %s;
             """
 
@@ -62,8 +60,8 @@ class PollDAO:
         polls_array = []
         while current_poll is not None:
             poll_object = Poll(id= current_poll[0], question= current_poll[1], isClosed= current_poll[2],
-                            isPublicStatistics= current_poll[3], numChosenOptions= current_poll[4], 
-                            timeLimit= current_poll[5], account_id= current_poll[6], created_at= current_poll[7], limit_vote_per_user= current_poll[0])
+                            isPublicStatistics= current_poll[3], limit_vote_per_user= current_poll[4],
+                            timeLimit= current_poll[5], account_id= current_poll[6], created_at= current_poll[7])
                 
             poll_dic = poll_object.get_json()
             polls_array.append(poll_dic)
@@ -112,8 +110,8 @@ class PollDAO:
 
             while current_poll is not None:
                 poll_object = Poll(id= current_poll[0], question= current_poll[1], isClosed= current_poll[2],
-                            isPublicStatistics= current_poll[3], numChosenOptions= current_poll[4], 
-                            timeLimit= current_poll[5], account_id= current_poll[6], created_at= current_poll[7], limit_vote_per_user= current_poll[0])
+                            isPublicStatistics= current_poll[3], limit_vote_per_user= current_poll[4],
+                            timeLimit= current_poll[5], account_id= current_poll[6], created_at= current_poll[7])
                 
                 poll_dic = poll_object.get_json()
                 polls_array.append(poll_dic)
@@ -139,15 +137,13 @@ class PollDAO:
         cursor.execute(check_sql, (poll_id,))
         poll = cursor.fetchone()
 
+        cursor.close()
+        conn.close()
+
         if poll:
-            print("poll_id: {}".format(poll[0]))
-            print("user_id: {}".format(user_id))
             if poll[0] == False and poll[1] != user_id:
                 raise UnauthorizedAccess()
             else:
                 return True
         else:
             raise NoObjectFound()
-
-        cursor.close()
-        conn.close()

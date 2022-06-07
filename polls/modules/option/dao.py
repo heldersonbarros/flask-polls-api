@@ -1,5 +1,5 @@
-from .connect_database import getConnection
-from models.vo.options import Options
+from utils.connect_database import getConnection
+from modules.option.model import Options
 
 class OptionsDAO:
 
@@ -66,7 +66,8 @@ class OptionsDAO:
             options_array.append(option_dic)
             current_option = cursor.fetchone()
         
-        return {"options": options_array, "total": str(total)}
-
+        
         cursor.close()
         conn.close()
+
+        return {"options": options_array, "total": str(total)}

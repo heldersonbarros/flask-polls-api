@@ -1,12 +1,16 @@
-from .connect_database import getConnection
-from models.vo.account import Account
+from utils.connect_database import getConnection
+from .model import Account
 import jwt
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask import current_app
 
 class AccountDAO:
 
-    def verify_token(token, secret_key):
-        data = jwt.decode(token, secret_key, algorithms=['HS256'])
+    @property
+    def secret_key(self):
+        return secret_key
+
+    def verify_token(token):
+        data = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=['HS256'])
 
         conn = getConnection()
         cursor = conn.cursor()

@@ -1,6 +1,5 @@
-from .connect_database import getConnection
-from models.vo.vote import Vote
-from models.vo.exceptions import ExceededVotes, NoObjectFound, UnauthorizedAccess
+from utils.connect_database import getConnection
+from modules.exceptions import ExceededVotes, NoObjectFound, UnauthorizedAccess
 
 class VoteDAO:
 
@@ -12,7 +11,7 @@ class VoteDAO:
             SELECT poll.limit_vote_per_user, poll.id FROM Poll 
             JOIN Options on poll.id = options.poll_id
             WHERE poll.id = %s AND options.id = %s AND
-            (timeLimit > CURRENT_TIMESTAMP OR timeLimit IS NULL) AND
+            (time_limit > CURRENT_TIMESTAMP OR time_limit IS NULL) AND
             isClosed = false;
         """
 
@@ -21,7 +20,8 @@ class VoteDAO:
         check_result = cursor.fetchone()
 
         if check_result:
-            if (check_result[0]!=0):
+            if (check_result[0]):
+                print("aqui")
                 if (vote.account_id != 0):
                     vote_sql = """
                             INSERT INTO vote (poll_id, option_id, account_id) 
